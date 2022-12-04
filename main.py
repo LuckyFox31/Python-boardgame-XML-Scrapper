@@ -144,6 +144,11 @@ def strip_html(html):
     return text.sub('', html)
 
 
+def list_to_string(current_list, delimiter=','):
+    temp = list(map(str, current_list))
+    return delimiter.join(temp)
+
+
 init()
 
 
@@ -163,11 +168,6 @@ def get_games():
     route = routes.base_url + routes.collection_route + '/' + collection_username
     parsed_data = get_parsed_data(route)
     return json.dumps(parse_items_in_collection(parsed_data))
-
-
-def list_to_string(current_list, delimiter=','):
-    temp = list(map(str, current_list))
-    return delimiter.join(temp)
 
 
 @app.route('/games/<int:game_id>')
