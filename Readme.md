@@ -13,6 +13,8 @@ Le projet consiste à récupérer les données présentes sur des collections ai
     * [Création d'un environnement lié au projet](#cration-dun-environnement-li-au-projet)
     * [Activation de l'environnement](#activation-de-lenvironnement)
     * [Installation des librairies et dépendances](#installation-des-librairies-et-dpendances)
+  * [Configuration du projet](#configuration-du-projet)
+    * [Liste des paramètres](#liste-des-paramtres)
 <!-- TOC -->
 
 ## Librairies externes utilisées 
@@ -26,10 +28,12 @@ Liste des dépendances disponible dans le fichier [requirements.txt](./requireme
 
 ## Ressources utilisées
 
-| Ressource                                                                                                    | Description                                                                                           |
-|--------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| [`https://api.geekdo.com/xmlapi/collection/megtrinity`](https://api.geekdo.com/xmlapi/collection/megtrinity) | URL vers la collection de jeux de sociétés lié au compte intitulé **megtrinity**                      |
-| [`https://api.geekdo.com/xmlapi/boardgame/[:ID]`](https://api.geekdo.com/xmlapi/boardgame/275044)            | URL prenant un ID en paramètre permettant de récupérer les données d'un jeu de société en particulier |
+| Ressource                                                                                                      | Description                                                                                                           |
+|----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| [`https://api.geekdo.com/xmlapi/collection/[:USERNAME]]`](https://api.geekdo.com/xmlapi/collection/megtrinity) | URL prenant un USERNAME en paramètre permettant de récupérer la collection de jeux de sociétés lié au compte spécifié |
+| [`https://api.geekdo.com/xmlapi/boardgame/[:ID]`](https://api.geekdo.com/xmlapi/boardgame/275044)              | URL prenant un ID en paramètre permettant de récupérer les données d'un jeu de société en particulier                 |
+
+Les routes vers les différentes ressources ont étés initialisés dans le fichier [routes.py](./src/routes.py)
 
 ## Installation du projet en local
 
@@ -58,3 +62,17 @@ source [NOM_ENVIRONNEMENT]/bin/activate
 ```shell
 pip install -r requirements.txt
 ```
+
+## Configuration du projet
+Le projet offre des paramètres configurable que l'on peut adapter selon nos besoins.
+Ces derniers peuvent être modifiés dans le fichier [main.py](./main.py).
+
+### Liste des paramètres
+
+| Paramètre                    | Type de donnée | Description                                                                                       |
+|------------------------------|----------------|---------------------------------------------------------------------------------------------------|
+| `collection_username`        | `String`       | Le nom de l'utilisateur possédant la collection que l'on souhaite récupérer                       |
+| `save_locally`               | `Boolean`      | Permet de définir si l'on souhaite sauvegarder localement les données récupérées par le programme |
+| `local_collection_file_path` | `String`       | Permet de définir le chemin où sera enregistré les données de la collection                       |
+| `local_boardgame_file_path`  | `String`       | Permet de définir le chemin où sera enregistré les données du jeu de société                      |
+|                              |                |                                                                                                   |
