@@ -13,7 +13,8 @@ save_locally = True
 
 # -- Functions --
 def init():
-    get_parsed_data()
+    parsed_data = get_parsed_data()
+    print(parse_items(parsed_data))
 
 
 def parse_data(content, save):
@@ -55,7 +56,38 @@ def get_parsed_data():
         print('\033[95mCollecting data...\033[0m')
         response = response.content
 
-    parsed_data = parse_data(response, save_locally)
+    return parse_data(response, save_locally)
+
+
+def parse_items(data):
+    print('\033[95mParsing items...\033[0m')
+    parsed_items_list = []
+
+    items_list = data.findAll('item')
+
+    for item in items_list:
+        item_id = item.get('objectid')
+        item_title = item.find('name').string if item.find('name') else False
+        item_lst_published_year = int(item.find('yearpublished').string) if item.find('yearpublished') else False
+        item_stats = item.find('stats')
+        item_min_player = int(item_stats.get('minplayers')) if item_stats.get('minplayers') else False
+        item_max_player = int(item_stats.get('maxplayers')) if item_stats.get('maxplayers') else False
+        item_min_playtime = int(item_stats.get('minplaytime')) if item_stats.get('minplaytime') else False
+        item_max_playtime = int(item_stats.get('maxplaytime')) if item_stats.get('maxplaytime') else False
+        item_thumbnail = item.find('thumbnail').string if item.find('thumbnail') else False
+
+        item_dict = {
+            'id': item_id,
+            'title': item_title,
+            'lst_published_year': item_lst_published_year,
+            'players': item_max_player if item_max_player == item_min_player else f"{item_min_player} - {item_max_player}",
+            'playtime': item_max_playtime if item_max_playtime == item_min_playtime else f"{item_min_playtime} - {item_max_playtime}",
+            'thumbnail': item_thumbnail
+        }
+
+        parsed_items_list.append(item_dict)
+
+    return parsed_items_list
 
 
 init()
