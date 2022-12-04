@@ -11,6 +11,7 @@ collection_username = 'megtrinity'
 local_collection_file_path = f"./local/collection/{collection_username}.xml"
 local_boardgame_file_path = './local/boardgame'
 save_locally = True
+app = Flask(__name__)
 
 
 # -- Functions --
@@ -57,7 +58,8 @@ def get_parsed_data(route, game_id=None):
     if not response.status_code == 200:
         print(f"\033[91m{response.status_code} - Cannot connect to server.\033[0m")
         save_locally = False
-        with open(f"{local_boardgame_file_path}/{game_id}.xml" if game_id else local_collection_file_path, 'r', encoding='UTF8') as file:
+        with open(f"{local_boardgame_file_path}/{game_id}.xml" if game_id else local_collection_file_path, 'r',
+                  encoding='UTF8') as file:
             response = file.read()
 
     else:
@@ -100,3 +102,13 @@ def parse_items(data):
 
 
 init()
+
+
+@app.route('/')
+def home():
+    return json.dumps({
+        'routes': {
+            f"{collection_username}'s boardgame collection": '/games',
+            'Search game by id': '/games/[:id]'
+        }
+    })
