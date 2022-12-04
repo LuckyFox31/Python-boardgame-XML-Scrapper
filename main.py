@@ -21,10 +21,6 @@ def init():
     if not os.path.isdir("./local/boardgame"):
         os.makedirs("./local/boardgame")
 
-    route = routes.base_url + routes.collection_route + '/' + collection_username
-    parsed_data = get_parsed_data(route)
-    print(parse_items(parsed_data))
-
 
 def parse_data(content, save, game_id):
     print('\033[95mParsing data...\033[0m')
@@ -112,3 +108,10 @@ def home():
             'Search game by id': '/games/[:id]'
         }
     })
+
+
+@app.route('/games')
+def get_games():
+    route = routes.base_url + routes.collection_route + '/' + collection_username
+    parsed_data = get_parsed_data(route)
+    return json.dumps(parse_items(parsed_data))
