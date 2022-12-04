@@ -1,5 +1,6 @@
 # -- Modules --
 import os
+import re
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -66,14 +67,14 @@ def get_parsed_data(route, game_id=None):
     return parse_data(response, save_locally, game_id)
 
 
-def parse_items(data):
+def parse_items_in_collection(data):
     print('\033[95mParsing items...\033[0m')
     parsed_items_list = []
 
     items_list = data.findAll('item')
 
     for item in items_list:
-        item_id = item.get('objectid')
+        item_id = int(item.get('objectid'))
         item_title = item.find('name').string if item.find('name') else False
         item_lst_published_year = int(item.find('yearpublished').string) if item.find('yearpublished') else False
         item_stats = item.find('stats')
@@ -97,9 +98,56 @@ def parse_items(data):
     return parsed_items_list
 
 
+def parse_game_item(data):
+    print('\033[95mParsing items...\033[0m')
+
+    game = data.find('boardgame')
+    game_id = int(game.get('objectid'))
+    game_names = game.findAll('name')
+    game_names_list = []
+    game_description = game.find('description').string if game.find('description') else False
+    game_image = game.find('image').string if game.find('image').string else False
+    game_min_player = int(game.find('minplayers').string) if game.find('minplayers') else False
+    game_max_player = int(game.find('maxplayers').string) if game.find('maxplayers') else False
+    game_min_playtime = int(game.find('minplaytime').string) if game.find('minplaytime') else False
+    game_max_playtime = int(game.find('maxplaytime').string) if game.find('maxplaytime') else False
+    game_categories = game.findAll('boardgamecategory')
+    game_categories_list = []
+    game_expansions = game.findAll('boardgameexpansion')
+    game_expansions_list = []
+
+    for game_name in game_names:
+        game_names_list.append(game_name.string)
+
+    for game_categorie in game_categories:
+        game_categories_list.append(game_categorie.string)
+
+    for game_expansion in game_expansions:
+        game_expansions_list.append(game_expansion.string)
+
+    game_dict = {
+        'id': game_id,
+        'title': game_names_list,
+        'description': strip_html(game_description),
+        'image': game_image,
+        'players': game_max_player if game_max_player == game_min_player else f"{game_min_player} - {game_max_player}",
+        'playtime': game_max_playtime if game_max_playtime == game_min_playtime else f"{game_min_playtime} - {game_max_playtime}",
+        'categories': list_to_string(game_categories_list),
+        'expansions': game_expansions_list
+    }
+
+    return game_dict
+
+
+def strip_html(html):
+    text = re.compile(r'<.*?>')
+    return text.sub('', html)
+
+
 init()
 
 
+# -- API Routes --
 @app.route('/')
 def home():
     return json.dumps({
@@ -114,4 +162,16 @@ def home():
 def get_games():
     route = routes.base_url + routes.collection_route + '/' + collection_username
     parsed_data = get_parsed_data(route)
-    return json.dumps(parse_items(parsed_data))
+    return json.dumps(parse_items_in_collection(parsed_data))
+
+
+def list_to_string(current_list, delimiter=','):
+    temp = list(map(str, current_list))
+    return delimiter.join(temp)
+
+
+@app.route('/games/<int:game_id>')
+def get_games_by_id(game_id):
+    route = routes.base_url + routes.boardgame_route + f"/{game_id}"
+    parsed_data = get_parsed_data(route, game_id)
+    return json.dumps(parse_game_item(parsed_data))
