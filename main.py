@@ -5,7 +5,6 @@ import json
 from flask import Flask
 import src.routes as routes
 
-
 # -- Config --
 collection_username = 'megtrinity'
 local_file_path = f"./local/{collection_username}_collection.xml"
@@ -13,6 +12,10 @@ save_locally = True
 
 
 # -- Functions --
+def init():
+    get_parsed_data()
+
+
 def parse_data(content, save):
     print('\033[95mParsing data...\033[0m')
 
@@ -55,4 +58,4 @@ def get_parsed_data():
     parsed_data = parse_data(response, save_locally)
 
 
-get_parsed_data()
+init()
