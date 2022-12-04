@@ -1,4 +1,5 @@
 # -- Modules --
+import os
 from bs4 import BeautifulSoup
 import requests
 import json
@@ -7,17 +8,24 @@ import src.routes as routes
 
 # -- Config --
 collection_username = 'megtrinity'
-local_file_path = f"./local/{collection_username}_collection.xml"
+local_collection_file_path = f"./local/collection/{collection_username}.xml"
+local_boardgame_file_path = './local/boardgame'
 save_locally = True
 
 
 # -- Functions --
 def init():
-    parsed_data = get_parsed_data()
+    if not os.path.isdir("./local/collection"):
+        os.makedirs("./local/collection")
+    if not os.path.isdir("./local/boardgame"):
+        os.makedirs("./local/boardgame")
+
+    route = routes.base_url + routes.collection_route + '/' + collection_username
+    parsed_data = get_parsed_data(route)
     print(parse_items(parsed_data))
 
 
-def parse_data(content, save):
+def parse_data(content, save, game_id):
     print('\033[95mParsing data...\033[0m')
 
     parsed_data = BeautifulSoup(content, features='xml')
@@ -33,22 +41,23 @@ def parse_data(content, save):
 
     if save:
         print('\033[95mSaving data...\033[0m')
-        with open(local_file_path, 'w', encoding='UTF8') as file:
+        file_path = f"{local_boardgame_file_path}/{game_id}.xml" if game_id else local_collection_file_path
+        with open(file_path, 'w', encoding='UTF8') as file:
             file.write(parsed_data.prettify())
-        print(f"\033[92mData saved successfully in \033[93m{local_file_path}\033[92m!\033[0m")
+        print(f"\033[92mData saved successfully in \033[93m{file_path}\033[92m!\033[0m")
 
     return parsed_data
 
 
-def get_parsed_data():
+def get_parsed_data(route, game_id=None):
     global save_locally
 
-    response = requests.get(routes.base_url + routes.collection_route + '/' + collection_username)
+    response = requests.get(route)
 
     if not response.status_code == 200:
         print(f"\033[91m{response.status_code} - Cannot connect to server.\033[0m")
         save_locally = False
-        with open(local_file_path, 'r', encoding='UTF8') as file:
+        with open(f"{local_boardgame_file_path}/{game_id}.xml" if game_id else local_collection_file_path, 'r', encoding='UTF8') as file:
             response = file.read()
 
     else:
@@ -56,7 +65,7 @@ def get_parsed_data():
         print('\033[95mCollecting data...\033[0m')
         response = response.content
 
-    return parse_data(response, save_locally)
+    return parse_data(response, save_locally, game_id)
 
 
 def parse_items(data):
